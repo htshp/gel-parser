@@ -1,0 +1,16 @@
+{
+  "name": "gel-parser",
+  "version": "1.0.0",
+  "description": "A text parser.",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "gel",
+    "gel-parser",
+    "parser"
+  ],
+  "author": "htshp",
+  "license": "MIT"
+}
