@@ -18,18 +18,35 @@ export interface IActionSet {
     [ruleName: string]: Action;
 }
 
+export interface IParserState{
+    match: any;
+    text: string;
+}
+
 export class Parser{
     constructor(private ruleSet: IRuleSet, private actSet: IActionSet){
         
     }
 
     run(text: string): any{
-        return this.parse('$begin');
+        const state: IParserState = {
+            match: null,
+            text: text
+        };
+        this.parse('$begin', state);
+        return state.match;
     }
 
-    private parse(rule: Rule):boolean{
+    private parse(rule: Rule, state: IParserState):boolean{
         // RegExp as Token rule.
         if(rule instanceof RegExp){
+            const matches = state.text.match(new RegExp(`^(${rule as RegExp})`));
+            if(!matches){
+                return false;
+            }
+            state.match = matches[0];
+            state.text = state.text.slice(matches[0].length, -1);
+            return true;
         }
         // String as Reference rule.
         else if(rule instanceof String){
