@@ -11,7 +11,6 @@ describe('GEL Parser', () => {
 
         const actions = {
             binExpr: ($: any) => {
-                console.log($);
                 return $.left + $.right;
             },
             atom: ($: any) => parseInt($[0])
@@ -70,6 +69,33 @@ describe('GEL Parser', () => {
 
         it('rules are not destroyed.', () => {
             assert.strictEqual((rules as any).$space, undefined);
+        });
+    });
+
+    context('Logging test.', () => {
+        const parser = new Parser({ $begin: [/./] }, {});
+
+        let buffer = '';
+        function log(message: string){
+            buffer += message;
+        }
+
+        it('Supressed log.', () => {
+            buffer = '';
+            parser.run('test', {
+                verbose: false,
+                logFunc: log
+            });
+            assert.ok(buffer === '');
+        });
+
+        it('Output log.', () => {
+            buffer = '';
+            parser.run('test', {
+                verbose: true,
+                logFunc: log
+            });
+            assert.ok(buffer !== '');
         });
     });
 });
