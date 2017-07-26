@@ -25,8 +25,12 @@ export interface IParserState {
 }
 
 export class Parser {
-    constructor(private ruleSet: IRuleSet, private actSet: IActionSet) {
+    ruleSet: IRuleSet;
+    actSet: IActionSet;
 
+    constructor(ruleSet: IRuleSet, actSet: IActionSet) {
+        this.ruleSet = Object.assign({}, ruleSet);
+        this.actSet = Object.assign({}, actSet);
     }
 
     run(text: string): any {
