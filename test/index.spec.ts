@@ -1,39 +1,37 @@
 import * as assert from 'power-assert';
 import {Parser} from '../src/index';
 
-describe("GEL Parser", ()=>{
-    it("RegExp rule test.", ()=>{
-        const rules = {
-            $begin: [/[0-9]+/]
-        };
+describe('GEL Parser', ()=>{
+    const rules = {
+        $begin: [/[0-9]+/],
+        $space: [/[ \t\r\n]*/]
+    };
 
-        const actions = {
-            $begin: ($: any)=>{
+    let isExecutedAction = false;
+    const actions = {
+        $begin: ($: any)=>{
+            isExecutedAction = true;
+            it('Check the expected value of the match result.', ()=>{
                 assert.deepEqual($, ['100']);
-                return parseInt($[0]);
-            }
-        };
+            });
+            return parseInt($[0]);
+        },
+        $space: ($: any)=>{
+            it('Check whether the space could was parsed.', ()=>{
+                assert.deepEqual($, [' \t\r\n']);
+            });
+            return $;
+        }
+    };
 
-        const intParser = new Parser(rules, actions);
-
-        assert.equal(intParser.run('100'), 100);
+    it('Check whether the action was executed.', ()=>{
+        assert.ok(isExecutedAction);
     });
 
-    it("$space test.", ()=>{
-        const rules = {
-            $begin: [/[0-9]+/],
-            $space: [/[ \t\r\n]*/]
-        };
+    const intParser = new Parser(rules, actions);
+    const result = intParser.run(' \t\r\n100');
 
-        const actions = {
-            $begin: ($: any)=>{
-                assert.deepEqual($, ['100']);
-                return parseInt($[0]);
-            }
-        };
-
-        const intParser = new Parser(rules, actions);
-
-        assert.equal(intParser.run('100'), 100);
+    it('Confirm whether the parse succeeded.', ()=>{
+        assert.equal(result, 100);
     });
 });
