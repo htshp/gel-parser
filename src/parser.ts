@@ -25,12 +25,17 @@ export interface IParserState {
 }
 
 export class Parser {
-    ruleSet: IRuleSet;
-    actSet: IActionSet;
+    private ruleSet: IRuleSet;
+    private actSet: IActionSet;
 
     constructor(ruleSet: IRuleSet, actSet: IActionSet) {
         this.ruleSet = Object.assign({}, ruleSet);
         this.actSet = Object.assign({}, actSet);
+
+        // If $space is omitted, the default $space is set.
+        if (!this.ruleSet.$space) {
+            this.ruleSet.$space = [/[ \t\r\n]*/];
+        }
     }
 
     run(text: string): any {
