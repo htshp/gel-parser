@@ -21,6 +21,7 @@ export interface IActionSet {
 export interface IParserState{
     match: any;
     text: string;
+    enableTrimSpace: boolean;
 }
 
 export class Parser{
@@ -31,7 +32,8 @@ export class Parser{
     run(text: string): any{
         const state: IParserState = {
             match: null,
-            text: text
+            text: text, 
+            enableTrimSpace: true
         };
         this.parse('$begin', state);
         return state.match;
@@ -41,10 +43,18 @@ export class Parser{
         // RegExp as Token rule.
         if(rule instanceof RegExp){
             console.log('Token rule: ' + rule);
+
+            if(state.enableTrimSpace){
+                state.enableTrimSpace = false;
+                this.parse('$space', state);
+                state.enableTrimSpace = true;
+            }
+
             const matches = state.text.match(new RegExp(`^(${(rule as RegExp).source})`));
             if(!matches){
                 return false;
             }
+            console.log('-> match: "' + matches[0] + '"');
             state.match = matches[0];
             state.text = state.text.slice(matches[0].length, -1);
             return true;

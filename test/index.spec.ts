@@ -22,7 +22,7 @@ describe("GEL Parser", ()=>{
     it("$space test.", ()=>{
         const rules = {
             $begin: [/[0-9]+/],
-            $space: [/[ \t\r\n]/]
+            $space: [/[ \t\r\n]*/]
         };
 
         const actions = {
