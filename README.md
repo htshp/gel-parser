@@ -9,7 +9,8 @@ Usage
 import {Parser} from 'gel-parser';
 
 const rules = {
-    $begin: [/[0-9]+/]
+    $begin: [/[0-9]+/],
+    $space: [/[ \t\r\n]/]
 };
 
 const actions = {
