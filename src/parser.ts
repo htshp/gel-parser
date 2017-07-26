@@ -60,7 +60,7 @@ export class Parser{
             console.log('Rule list: ' + rule);
             const resultList: any[] = [];
             rule.forEach(r=>{
-                if(this.parse(r, state)){
+                if(!this.parse(r, state)){
                     return false;
                 }
                 resultList.push(state.match);
