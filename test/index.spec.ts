@@ -45,7 +45,7 @@ describe('GEL Parser', () => {
         const result = new Parser(rules, {}).run(' 123');
 
         it('$space is working.', () => {
-            assert.strictEqual(result, 123);
+            assert.deepStrictEqual(result, ['123']);
         });
 
         it('rules are not destroyed.', () => {
