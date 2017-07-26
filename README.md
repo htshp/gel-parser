@@ -29,9 +29,12 @@ Roadmap
 
 - [x] Toplevel single rule.
   - ex) $begin: 'expr'
-- [ ] 'or' rule.
+- [x] 'or' rule.
 - [ ] Calculator sample.
 - [ ] DSL sample.
 - [ ] Nest tag rule. 
 - [ ] Backtracking.
 - [ ] Error check.
+- [ ] 'time' rule.
+- [ ] Support left recursive.
+- [ ] 'option' rule.

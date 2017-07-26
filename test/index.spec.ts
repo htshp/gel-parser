@@ -3,8 +3,35 @@ import { Parser } from '../src/index';
 import { or } from '../src/logicalRule';
 
 describe('GEL Parser', () => {
-    context('Basic Test', () => {
+    context('Calculator parser test.', () => {
         const rules = {
+            $begin: 'expr',
+            expr: or(
+                [ {left: 'int'}, /[/+]/, {right: 'expr'} ], 
+                {atom: 'int'}),
+            int: /[0-9]+/
+        };
+        const actions = {
+            expr: $ => {
+                if($.left){
+                    return $.left + $.right;
+                }else{
+                    return $.atom;
+                }
+            },
+            int: $ => parseInt($)
+        };
+
+        const parser = new Parser(rules, actions);
+        const result = parser.run('1 + 2 + 3 + 100 + 2000');
+
+        it('The calculation result is correct.', () => {
+            assert.strictEqual(result, 2106);
+        });
+    });
+
+    context('Logical rules test.', () => {
+         const rules = {
             $begin: or(
                 {a: 'int'}, 
                 {b: 'alphabet'}),
