@@ -40,7 +40,8 @@ export class Parser{
     private parse(rule: Rule, state: IParserState):boolean{
         // RegExp as Token rule.
         if(rule instanceof RegExp){
-            const matches = state.text.match(new RegExp(`^(${rule as RegExp})`));
+            console.log('Token rule: ' + rule);
+            const matches = state.text.match(new RegExp(`^(${(rule as RegExp).source})`));
             if(!matches){
                 return false;
             }
@@ -49,23 +50,26 @@ export class Parser{
             return true;
         }
         // String as Reference rule.
-        else if(rule instanceof String){
+        else if(typeof rule === 'string'){
+            console.log('Reference rule: ' + rule);
             const ruleList = this.ruleSet[rule as string];
-            ruleList.forEach(element => {
-                
-            });
+            return this.parse(ruleList, state);
         }
-        // Array as rule list.
+        // Array as Rule list.
         else if(rule instanceof Array){
+            console.log('Rule list: ' + rule);
             const resultList: any[] = [];
             rule.forEach(r=>{
-                if(this.step(r, isSkipTrim$space)){
+                if(this.parse(r, state)){
                     return false;
                 }
-                resultList.push(this.result);
+                resultList.push(state.match);
             });
-            this.result = resultList;
+            state.match = resultList;
             return true;
         }
+
+        console.log('Unknown rule: ' + rule);
+        return false;
     }
 }
