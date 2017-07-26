@@ -4,8 +4,30 @@ import { Parser } from '../src/index';
 describe('GEL Parser', () => {
     context('Basic Test', () => {
         const rules = {
-            $begin: [/[0-9]+/],
-            $space: [/[ \t\r\n]*/]
+            $begin:  ['binExpr'],
+            binExpr: [{left: 'atom'}, /[+]/, {right: 'atom'}],
+            atom:    [/[0-9]+/]
+        };
+
+        const actions = {
+            binExpr: ($: any) => {
+                console.log($);
+                return $.left + $.right;
+            },
+            atom: ($: any) => parseInt($[0])
+        };
+
+        const intParser = new Parser(rules, actions);
+        const result = intParser.run(' 100 + 123');
+
+        it('Confirm whether the parse succeeded.', () => {
+            assert.strictEqual(result[0], 223);
+        });
+    });
+
+    context('Action test.', () => {
+        const rules = {
+            $begin:  [/[0-9]+/]
         };
 
         let isExecutedAction = false;
@@ -13,39 +35,37 @@ describe('GEL Parser', () => {
             $begin: ($: any) => {
                 isExecutedAction = true;
                 it('Check the expected value of the match result.', () => {
-                    assert.deepStrictEqual($, ['100']);
+                    assert.strictEqual($[0], '100');
                 });
                 return parseInt($[0]);
-            },
+            }
+        };
+
+        const intParser = new Parser(rules, actions);
+        const result = intParser.run('100');
+
+        it('Check whether the action was executed.', () => {
+            assert.ok(isExecutedAction);
+        });
+    });
+
+    context('$space test.', () => {
+        const rules = {
+            $begin: [/[0-9]+/]
+        };
+        const actions = {
             $space: ($: any) => {
                 it('Check whether the space could was parsed.', () => {
-                    assert.deepStrictEqual($, [' \t\r\n']);
+                    assert.strictEqual($[0], ' \t\r\n');
                 });
                 return $;
             }
         };
 
-        it('Check whether the action was executed.', () => {
-            assert.ok(isExecutedAction);
-        });
-
-        const intParser = new Parser(rules, actions);
-        const result = intParser.run(' \t\r\n100');
-
-        it('Confirm whether the parse succeeded.', () => {
-            assert.strictEqual(result, 100);
-        });
-    });
-
-    context('Default $space', () => {
-        const rules = {
-            $begin: [/[0-9]+/]
-        };
-
-        const result = new Parser(rules, {}).run(' 123');
+        const result = new Parser(rules, actions).run(' \t\r\n123');
 
         it('$space is working.', () => {
-            assert.deepStrictEqual(result, ['123']);
+            assert.strictEqual(result[0], '123');
         });
 
         it('rules are not destroyed.', () => {

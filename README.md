@@ -9,15 +9,17 @@ Usage
 import {Parser} from 'gel-parser';
 
 const rules = {
-    $begin: [/[0-9]+/],
-    $space: [/[ \t\r\n]/]
+    $begin:  ['binExpr'],
+    binExpr: [{left: 'atom'}, /[+]/, {right: 'atom'}],
+    atom:    [/[0-9]+/]
 };
 
 const actions = {
-    $begin: $=>parseInt($[0])
+    binExpr: $=>$.left + $.right,
+    atom:    $=>parseInt($[0])
 };
 
 const intParser = new Parser(rules, actions);
 
-console.log(intParser.run('100'));
+console.log(intParser.run('100 + 123'));
 ```

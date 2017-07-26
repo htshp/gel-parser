@@ -1,5 +1,5 @@
 export interface Rule {
-    [index: number]: string | RegExp;
+    [index: number]: string | RegExp | {[tag: string]: Rule;};
 }
 
 export interface IRuleSet {
@@ -22,6 +22,7 @@ export interface IParserState {
     match: any;
     text: string;
     enableTrimSpace: boolean;
+    taggedMatch: {[tagName: string]: any};
 }
 
 export class Parser {
@@ -42,7 +43,8 @@ export class Parser {
         const state: IParserState = {
             match: null,
             text: text,
-            enableTrimSpace: true
+            enableTrimSpace: true,
+            taggedMatch: {}
         };
         this.parse('$begin', state);
         return state.match;
@@ -71,13 +73,16 @@ export class Parser {
         // String as Reference rule.
         else if (typeof rule === 'string') {
             console.log('Reference rule: ' + rule);
+            const backupTaggedMatch = state.taggedMatch;
+            state.taggedMatch = {};
             const ruleList = this.ruleSet[rule as string];
             const isMatched = this.parse(ruleList, state);
 
             if (isMatched && this.actSet[rule as string]) {
-                state.match = this.actSet[rule as string](state.match);
+                state.match = this.actSet[rule as string](Object.assign({}, state.match, state.taggedMatch));
             }
 
+            state.taggedMatch = backupTaggedMatch;
             return isMatched;
         }
         // Array as Rule list.
@@ -91,6 +96,19 @@ export class Parser {
                 resultList.push(state.match);
             });
             state.match = resultList;
+            return true;
+        }
+        // Object as tagged rule.
+        else if (rule instanceof Object && Object.keys(rule).length === 1) {
+            const tag = Object.keys(rule)[0];
+            const taggedRule = (rule as any)[tag];
+            console.log(`Tagged rule: {${tag}: ${taggedRule}}`);
+
+            if (!this.parse(taggedRule, state)) {
+                return false;
+            }
+
+            state.taggedMatch[tag] = state.match;
             return true;
         }
 
