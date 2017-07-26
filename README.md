@@ -27,7 +27,7 @@ console.log(intParser.run('100 + 123'));
 Roadmap
 ----
 
-- [ ] Toplevel single rule.
+- [x] Toplevel single rule.
   - ex) $begin: 'expr'
 - [ ] 'or' rule.
 - [ ] Calculator sample.

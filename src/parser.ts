@@ -1,10 +1,14 @@
+export type RuleAtom = string | RegExp | {[tag: string]: TopLevelRule;};
+
 export interface Rule {
-    [index: number]: string | RegExp | {[tag: string]: Rule;};
+    [index: number]: RuleAtom;
 }
 
+export type TopLevelRule = Rule | RuleAtom;
+
 export interface IRuleSet {
-    $begin: Rule;
-    [ruleName: string]: Rule;
+    $begin: TopLevelRule;
+    [ruleName: string]: TopLevelRule;
 }
 
 export interface IParseResult {
@@ -41,7 +45,7 @@ export class Parser {
 
         // If $space is omitted, the default $space is set.
         if (!this.ruleSet.$space) {
-            this.ruleSet.$space = [/[ \t\r\n]*/];
+            this.ruleSet.$space = /[ \t\r\n]*/;
         }
     }
 
@@ -63,7 +67,7 @@ export class Parser {
         return state.match;
     }
 
-    private parse(rule: Rule, state: IParserState): boolean {
+    private parse(rule: TopLevelRule, state: IParserState): boolean {
         // RegExp as Token rule.
         if (rule instanceof RegExp) {
             this.log('Token rule: ' + rule);
@@ -92,7 +96,11 @@ export class Parser {
             const isMatched = this.parse(ruleList, state);
 
             if (isMatched && this.actSet[rule as string]) {
-                state.match = this.actSet[rule as string](Object.assign({}, state.match, state.taggedMatch));
+                let $ = state.match;
+                if(Object.keys(state.taggedMatch).length > 0){
+                    $ = Object.assign({}, state.match, state.taggedMatch);
+                }
+                state.match = this.actSet[rule as string]($);
             }
 
             state.taggedMatch = backupTaggedMatch;

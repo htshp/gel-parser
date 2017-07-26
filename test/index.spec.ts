@@ -4,7 +4,7 @@ import { Parser } from '../src/index';
 describe('GEL Parser', () => {
     context('Basic Test', () => {
         const rules = {
-            $begin:  ['binExpr'],
+            $begin:  'binExpr',
             binExpr: [{left: 'atom'}, /[+]/, {right: 'atom'}],
             atom:    [/[0-9]+/]
         };
@@ -20,13 +20,13 @@ describe('GEL Parser', () => {
         const result = intParser.run(' 100 + 123');
 
         it('Confirm whether the parse succeeded.', () => {
-            assert.strictEqual(result[0], 223);
+            assert.strictEqual(result, 223);
         });
     });
 
     context('Action test.', () => {
         const rules = {
-            $begin:  [/[0-9]+/]
+            $begin:  /[0-9]+/
         };
 
         let isExecutedAction = false;
@@ -34,9 +34,9 @@ describe('GEL Parser', () => {
             $begin: ($: any) => {
                 isExecutedAction = true;
                 it('Check the expected value of the match result.', () => {
-                    assert.strictEqual($[0], '100');
+                    assert.strictEqual($, '100');
                 });
-                return parseInt($[0]);
+                return parseInt($);
             }
         };
 
@@ -50,12 +50,12 @@ describe('GEL Parser', () => {
 
     context('$space test.', () => {
         const rules = {
-            $begin: [/[0-9]+/]
+            $begin: /[0-9]+/
         };
         const actions = {
             $space: ($: any) => {
                 it('Check whether the space could was parsed.', () => {
-                    assert.strictEqual($[0], ' \t\r\n');
+                    assert.strictEqual($, ' \t\r\n');
                 });
                 return $;
             }
@@ -64,7 +64,7 @@ describe('GEL Parser', () => {
         const result = new Parser(rules, actions).run(' \t\r\n123');
 
         it('$space is working.', () => {
-            assert.strictEqual(result[0], '123');
+            assert.strictEqual(result, '123');
         });
 
         it('rules are not destroyed.', () => {
@@ -73,7 +73,7 @@ describe('GEL Parser', () => {
     });
 
     context('Logging test.', () => {
-        const parser = new Parser({ $begin: [/./] }, {});
+        const parser = new Parser({ $begin: /./ }, {});
 
         let buffer = '';
         function log(message: string){
