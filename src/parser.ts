@@ -1,4 +1,4 @@
-export interface Rule{
+export interface Rule {
     [index: number]: string | RegExp;
 }
 
@@ -18,40 +18,40 @@ export interface IActionSet {
     [ruleName: string]: Action;
 }
 
-export interface IParserState{
+export interface IParserState {
     match: any;
     text: string;
     enableTrimSpace: boolean;
 }
 
-export class Parser{
-    constructor(private ruleSet: IRuleSet, private actSet: IActionSet){
-        
+export class Parser {
+    constructor(private ruleSet: IRuleSet, private actSet: IActionSet) {
+
     }
 
-    run(text: string): any{
+    run(text: string): any {
         const state: IParserState = {
             match: null,
-            text: text, 
+            text: text,
             enableTrimSpace: true
         };
         this.parse('$begin', state);
         return state.match;
     }
 
-    private parse(rule: Rule, state: IParserState):boolean{
+    private parse(rule: Rule, state: IParserState): boolean {
         // RegExp as Token rule.
-        if(rule instanceof RegExp){
+        if (rule instanceof RegExp) {
             console.log('Token rule: ' + rule);
 
-            if(state.enableTrimSpace){
+            if (state.enableTrimSpace) {
                 state.enableTrimSpace = false;
                 this.parse('$space', state);
                 state.enableTrimSpace = true;
             }
 
             const matches = state.text.match(new RegExp(`^(${(rule as RegExp).source})`));
-            if(!matches){
+            if (!matches) {
                 return false;
             }
             console.log('-> match: "' + matches[0] + '"');
@@ -60,23 +60,23 @@ export class Parser{
             return true;
         }
         // String as Reference rule.
-        else if(typeof rule === 'string'){
+        else if (typeof rule === 'string') {
             console.log('Reference rule: ' + rule);
             const ruleList = this.ruleSet[rule as string];
             const isMatched = this.parse(ruleList, state);
 
-            if(isMatched && this.actSet[rule as string]){
+            if (isMatched && this.actSet[rule as string]) {
                 state.match = this.actSet[rule as string](state.match);
             }
 
             return isMatched;
         }
         // Array as Rule list.
-        else if(rule instanceof Array){
+        else if (rule instanceof Array) {
             console.log('Rule list: ' + rule);
             const resultList: any[] = [];
-            rule.forEach(r=>{
-                if(!this.parse(r, state)){
+            rule.forEach(r => {
+                if (!this.parse(r, state)) {
                     return false;
                 }
                 resultList.push(state.match);
