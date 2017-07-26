@@ -56,14 +56,20 @@ export class Parser{
             }
             console.log('-> match: "' + matches[0] + '"');
             state.match = matches[0];
-            state.text = state.text.slice(matches[0].length, -1);
+            state.text = state.text.slice(matches[0].length);
             return true;
         }
         // String as Reference rule.
         else if(typeof rule === 'string'){
             console.log('Reference rule: ' + rule);
             const ruleList = this.ruleSet[rule as string];
-            return this.parse(ruleList, state);
+            const isMatched = this.parse(ruleList, state);
+
+            if(isMatched && this.actSet[rule as string]){
+                state.match = this.actSet[rule as string](state.match);
+            }
+
+            return isMatched;
         }
         // Array as Rule list.
         else if(rule instanceof Array){

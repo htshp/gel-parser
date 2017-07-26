@@ -34,6 +34,6 @@ describe("GEL Parser", ()=>{
 
         const intParser = new Parser(rules, actions);
 
-        assert.equal(intParser.run(' \t\r\n100'), 100);
+        assert.equal(intParser.run('100'), 100);
     });
 });
