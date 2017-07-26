@@ -1,4 +1,6 @@
-export type RuleAtom = string | RegExp | {[tag: string]: TopLevelRule;};
+import { LogicalRuleFunc, ILogicalRule } from './logicalRule';
+
+export type RuleAtom = string | RegExp | {[tag: string]: TopLevelRule;} | LogicalRuleFunc;
 
 export interface Rule {
     [index: number]: RuleAtom;
@@ -45,7 +47,7 @@ export class Parser {
 
         // If $space is omitted, the default $space is set.
         if (!this.ruleSet.$space) {
-            this.ruleSet.$space = /[ \t\r\n]*/;
+            this.ruleSet.$space = /[ \t\r\n]+/;
         }
     }
 
@@ -95,12 +97,13 @@ export class Parser {
             const ruleList = this.ruleSet[rule as string];
             const isMatched = this.parse(ruleList, state);
 
-            if (isMatched && this.actSet[rule as string]) {
-                let $ = state.match;
+            if(isMatched){
                 if(Object.keys(state.taggedMatch).length > 0){
-                    $ = Object.assign({}, state.match, state.taggedMatch);
+                    state.match = Object.assign({}, state.match, state.taggedMatch);
                 }
-                state.match = this.actSet[rule as string]($);
+                if (this.actSet[rule as string]) {
+                    state.match = this.actSet[rule as string](state.match);
+                }
             }
 
             state.taggedMatch = backupTaggedMatch;
@@ -131,6 +134,29 @@ export class Parser {
 
             state.taggedMatch[tag] = state.match;
             return true;
+        }
+        // Function as Logical rule.
+        if (rule instanceof Function) {
+            const logicalRule: ILogicalRule = (rule as Function)();
+
+            switch(logicalRule.type){
+                case 'or':
+                    const rules: TopLevelRule[] = logicalRule.value;
+                    this.log('or: ' + rules);
+
+                    for(const i in rules){
+                        const backupState = Object.assign({}, state);
+                        if( this.parse(rules[i], state) ){
+                            return true;
+                        }else{
+                            // Fallback text and taggedMatch.
+                            state.text = backupState.text;
+                            state.taggedMatch = backupState.taggedMatch;
+                        }
+                    }
+
+                    return false;
+            }
         }
 
         this.log('Unknown rule: ' + rule);

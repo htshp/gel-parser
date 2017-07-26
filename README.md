@@ -32,3 +32,6 @@ Roadmap
 - [ ] 'or' rule.
 - [ ] Calculator sample.
 - [ ] DSL sample.
+- [ ] Nest tag rule. 
+- [ ] Backtracking.
+- [ ] Error check.

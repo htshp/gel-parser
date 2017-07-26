@@ -1,26 +1,27 @@
 import * as assert from 'power-assert';
 import { Parser } from '../src/index';
+import { or } from '../src/logicalRule';
 
 describe('GEL Parser', () => {
     context('Basic Test', () => {
         const rules = {
-            $begin:  'binExpr',
-            binExpr: [{left: 'atom'}, /[+]/, {right: 'atom'}],
-            atom:    [/[0-9]+/]
+            $begin: or(
+                {a: 'int'}, 
+                {b: 'alphabet'}),
+            int: /[0-9]+/,
+            alphabet: /[a-zA-Z]+/
         };
 
-        const actions = {
-            binExpr: ($: any) => {
-                return $.left + $.right;
-            },
-            atom: ($: any) => parseInt($[0])
-        };
+        const parser = new Parser(rules, {});
 
-        const intParser = new Parser(rules, actions);
-        const result = intParser.run(' 100 + 123');
+        it('Match only one rule.', () => {
+            const result = parser.run('100');
+            assert.strictEqual(result.a, '100');
+            assert.strictEqual(result.b, undefined);
 
-        it('Confirm whether the parse succeeded.', () => {
-            assert.strictEqual(result, 223);
+            const result2 = parser.run('abc');
+            assert.strictEqual(result2.a, undefined);
+            assert.strictEqual(result2.b, 'abc');
         });
     });
 
@@ -97,5 +98,22 @@ describe('GEL Parser', () => {
             });
             assert.ok(buffer !== '');
         });
+    });
+
+    context('Tagged rule test.', () => {
+        const rules = {
+            $begin:  {a: /hello/}
+        };
+
+        const actions = {
+            $begin: $ => {
+                it('Match results can be obtained by tag specification.', () => {
+                    assert.strictEqual($.a, 'hello');
+                    return $;
+                });
+            }
+        };
+
+        new Parser(rules, actions).run('hello');
     });
 });
