@@ -30,7 +30,7 @@ Roadmap
 - [x] Toplevel single rule.
   - ex) $begin: 'expr'
 - [x] 'or' rule.
-- [ ] Calculator sample.
+- [x] Calculator sample.
 - [ ] DSL sample.
 - [ ] Nest tag rule. 
 - [ ] Backtracking.
