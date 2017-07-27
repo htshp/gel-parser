@@ -29,6 +29,9 @@ export interface IParserState {
     text: string;
     enableTrimSpace: boolean;
     taggedMatch: {[tagName: string]: any};
+
+    // For debug.
+    lastText?: string;
 }
 
 export interface IParserOption{
@@ -56,7 +59,8 @@ export class Parser {
             match: null,
             text: text,
             enableTrimSpace: true,
-            taggedMatch: {}
+            taggedMatch: {},
+            lastText: ''
         };
 
         const DEFAULT_OPTION: IParserOption = {
@@ -70,6 +74,11 @@ export class Parser {
     }
 
     private parse(rule: TopLevelRule, state: IParserState): boolean {
+        if(state.lastText !== state.text){
+            this.log(`[TEXT CHANGED] "${state.lastText}" => "${state.text}"`);
+            state.lastText = state.text;
+        }
+        
         // RegExp as Token rule.
         if (rule instanceof RegExp) {
             this.log('Token rule: ' + rule);
@@ -113,12 +122,13 @@ export class Parser {
         else if (rule instanceof Array) {
             this.log('Rule list: ' + rule);
             const resultList: any[] = [];
-            rule.forEach(r => {
+            for(const i in rule){
+                const r = rule[i];
                 if (!this.parse(r, state)) {
                     return false;
                 }
                 resultList.push(state.match);
-            });
+            }
             state.match = resultList;
             return true;
         }

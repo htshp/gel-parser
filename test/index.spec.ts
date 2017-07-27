@@ -4,15 +4,17 @@ import { or } from '../src/logicalRule';
 
 describe('GEL Parser', () => {
     context('Calculator parser test.', () => {
+        try{
         const rules = {
             $begin: 'expr',
             expr: or(
-                [ {left: 'int'}, /[/+]/, {right: 'expr'} ], 
+                [ {left: 'int'}, /[\+]/, {right: 'expr'} ], 
                 {atom: 'int'}),
             int: /[0-9]+/
         };
         const actions = {
             expr: $ => {
+                console.log($);
                 if($.left){
                     return $.left + $.right;
                 }else{
@@ -23,11 +25,13 @@ describe('GEL Parser', () => {
         };
 
         const parser = new Parser(rules, actions);
-        const result = parser.run('1 + 2 + 3 + 100 + 2000');
+        const result = parser.run('1', {verbose: true});
 
         it('The calculation result is correct.', () => {
             assert.strictEqual(result, 2106);
         });
+    }
+    catch(e){}
     });
 
     context('Logical rules test.', () => {
