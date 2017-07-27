@@ -1,13 +1,13 @@
 import { TopLevelRule } from './parser';
 
-export interface ILogicalRule{
+export interface ILogicalRule {
     type: 'or';
-    value: any;   
+    value: any;
 }
 
-export type LogicalRuleFunc = ()=>ILogicalRule;
+export type LogicalRuleFunc = () => ILogicalRule;
 
-export function or(...rules: TopLevelRule[]): LogicalRuleFunc{
+export function or(...rules: TopLevelRule[]): LogicalRuleFunc {
     const ret: ILogicalRule = {
         type: 'or',
         value: rules

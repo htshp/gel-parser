@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import { LogicalRuleFunc, ILogicalRule } from './logicalRule';
 
 export type RuleAtom = string | RegExp | {[tag: string]: TopLevelRule;} | LogicalRuleFunc;
@@ -45,12 +46,12 @@ export class Parser {
     private option: IParserOption;
 
     constructor(ruleSet: IRuleSet, actSet: IActionSet) {
-        this.ruleSet = Object.assign({}, ruleSet);
-        this.actSet = Object.assign({}, actSet);
+        this.ruleSet = _.cloneDeep(ruleSet);
+        this.actSet = _.cloneDeep(actSet);
 
         // If $space is omitted, the default $space is set.
         if (!this.ruleSet.$space) {
-            this.ruleSet.$space = /[ \t\r\n]+/;
+            this.ruleSet.$space = /[ \t\r\n]*/;
         }
     }
 
@@ -81,7 +82,7 @@ export class Parser {
         
         // RegExp as Token rule.
         if (rule instanceof RegExp) {
-            this.log('Token rule: ' + rule);
+            this.log('[RULE] Token: ' + rule);
 
             if (state.enableTrimSpace) {
                 state.enableTrimSpace = false;
@@ -91,6 +92,7 @@ export class Parser {
 
             const matches = state.text.match(new RegExp(`^(${(rule as RegExp).source})`));
             if (!matches) {
+                this.log('-> failed Token : ' + rule);
                 return false;
             }
             this.log('-> match: "' + matches[0] + '"');
@@ -100,7 +102,7 @@ export class Parser {
         }
         // String as Reference rule.
         else if (typeof rule === 'string') {
-            this.log('Reference rule: ' + rule);
+            this.log('[RULE] Reference: ' + rule);
             const backupTaggedMatch = state.taggedMatch;
             state.taggedMatch = {};
             const ruleList = this.ruleSet[rule as string];
@@ -120,7 +122,7 @@ export class Parser {
         }
         // Array as Rule list.
         else if (rule instanceof Array) {
-            this.log('Rule list: ' + rule);
+            this.log('[RULE] List: ' + rule);
             const resultList: any[] = [];
             for(const i in rule){
                 const r = rule[i];
@@ -136,7 +138,7 @@ export class Parser {
         else if (rule instanceof Object && Object.keys(rule).length === 1) {
             const tag = Object.keys(rule)[0];
             const taggedRule = (rule as any)[tag];
-            this.log(`Tagged rule: {${tag}: ${taggedRule}}`);
+            this.log(`[RULE] Tagged: {${tag}: ${taggedRule}}`);
 
             if (!this.parse(taggedRule, state)) {
                 return false;
@@ -152,10 +154,10 @@ export class Parser {
             switch(logicalRule.type){
                 case 'or':
                     const rules: TopLevelRule[] = logicalRule.value;
-                    this.log('or: ' + rules);
+                    this.log('[RULE] or: ' + rules);
 
                     for(const i in rules){
-                        const backupState = Object.assign({}, state);
+                        const backupState = _.cloneDeep(state);
                         if( this.parse(rules[i], state) ){
                             return true;
                         }else{

@@ -4,20 +4,18 @@ import { or } from '../src/logicalRule';
 
 describe('GEL Parser', () => {
     context('Calculator parser test.', () => {
-        try{
         const rules = {
             $begin: 'expr',
             expr: or(
-                [ {left: 'int'}, /[\+]/, {right: 'expr'} ], 
-                {atom: 'int'}),
+                [{ left: 'int' }, /[\+]/, { right: 'expr' }],
+                { atom: 'int' }),
             int: /[0-9]+/
         };
         const actions = {
             expr: $ => {
-                console.log($);
-                if($.left){
+                if ($.left) {
                     return $.left + $.right;
-                }else{
+                } else {
                     return $.atom;
                 }
             },
@@ -25,20 +23,18 @@ describe('GEL Parser', () => {
         };
 
         const parser = new Parser(rules, actions);
-        const result = parser.run('1', {verbose: true});
+        const result = parser.run('1 + 2 + 3 + 2000 + 100');
 
         it('The calculation result is correct.', () => {
             assert.strictEqual(result, 2106);
         });
-    }
-    catch(e){}
     });
 
     context('Logical rules test.', () => {
-         const rules = {
+        const rules = {
             $begin: or(
-                {a: 'int'}, 
-                {b: 'alphabet'}),
+                { a: 'int' },
+                { b: 'alphabet' }),
             int: /[0-9]+/,
             alphabet: /[a-zA-Z]+/
         };
@@ -58,7 +54,7 @@ describe('GEL Parser', () => {
 
     context('Action test.', () => {
         const rules = {
-            $begin:  /[0-9]+/
+            $begin: /[0-9]+/
         };
 
         let isExecutedAction = false;
@@ -108,7 +104,7 @@ describe('GEL Parser', () => {
         const parser = new Parser({ $begin: /./ }, {});
 
         let buffer = '';
-        function log(message: string){
+        function log(message: string) {
             buffer += message;
         }
 
@@ -133,7 +129,7 @@ describe('GEL Parser', () => {
 
     context('Tagged rule test.', () => {
         const rules = {
-            $begin:  {a: /hello/}
+            $begin: { a: /hello/ }
         };
 
         const actions = {
