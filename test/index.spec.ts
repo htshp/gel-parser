@@ -143,4 +143,18 @@ describe('GEL Parser', () => {
 
         new Parser(rules, actions).run('hello');
     });
+
+    context('Nest tagged rule test.', () => {
+        const rules = {
+            $begin: { a: { b: { c: /100/ } } }
+        };
+
+        const parser = new Parser(rules, {});
+        const result = parser.run('100',  {verbose: true});
+
+        it('Match results can be obtained even with nested tags.', () => {
+            console.log(result);
+            assert.strictEqual(result.a.b.c, '100');
+        });
+    });
 });

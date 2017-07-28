@@ -64,74 +64,79 @@ export class Parser {
             lastText: ''
         };
 
+        const s = { state: state };
+
         const DEFAULT_OPTION: IParserOption = {
             verbose: false,
             logFunc: console.log
         };
         this.option = Object.assign(DEFAULT_OPTION, option);
 
-        this.parse('$begin', state);
-        return state.match;
+        this.parse('$begin', s);
+        return s.state.match;
     }
 
-    private parse(rule: TopLevelRule, state: IParserState): boolean {
-        if(state.lastText !== state.text){
-            this.log(`[TEXT CHANGED] "${state.lastText}" => "${state.text}"`);
-            state.lastText = state.text;
+    private parse(rule: TopLevelRule, s: {state: IParserState}): boolean {
+        if(s.state.lastText !== s.state.text){
+            this.log(`[TEXT CHANGED] "${s.state.lastText}" => "${s.state.text}"`);
+            s.state.lastText = s.state.text;
         }
         
         // RegExp as Token rule.
         if (rule instanceof RegExp) {
             this.log('[RULE] Token: ' + rule);
 
-            if (state.enableTrimSpace) {
-                state.enableTrimSpace = false;
-                this.parse('$space', state);
-                state.enableTrimSpace = true;
+            if (s.state.enableTrimSpace) {
+                s.state.enableTrimSpace = false;
+                this.parse('$space', s);
+                s.state.enableTrimSpace = true;
             }
 
-            const matches = state.text.match(new RegExp(`^(${(rule as RegExp).source})`));
+            const matches = s.state.text.match(new RegExp(`^(${(rule as RegExp).source})`));
             if (!matches) {
                 this.log('-> failed Token : ' + rule);
                 return false;
             }
             this.log('-> match: "' + matches[0] + '"');
-            state.match = matches[0];
-            state.text = state.text.slice(matches[0].length);
+            s.state.match = matches[0];
+            s.state.text = s.state.text.slice(matches[0].length);
             return true;
         }
         // String as Reference rule.
         else if (typeof rule === 'string') {
             this.log('[RULE] Reference: ' + rule);
-            const backupTaggedMatch = state.taggedMatch;
-            state.taggedMatch = {};
+            const backupTaggedMatch = s.state.taggedMatch;
+            s.state.taggedMatch = {};
             const ruleList = this.ruleSet[rule as string];
-            const isMatched = this.parse(ruleList, state);
+            const isMatched = this.parse(ruleList, s);
 
             if(isMatched){
-                if(Object.keys(state.taggedMatch).length > 0){
-                    state.match = Object.assign({}, state.match, state.taggedMatch);
+                if(Object.keys(s.state.taggedMatch).length > 0){
+                    s.state.match = Object.assign({}, s.state.match, s.state.taggedMatch);
                 }
                 if (this.actSet[rule as string]) {
-                    state.match = this.actSet[rule as string](state.match);
+                    s.state.match = this.actSet[rule as string](s.state.match);
                 }
             }
 
-            state.taggedMatch = backupTaggedMatch;
+            s.state.taggedMatch = backupTaggedMatch;
             return isMatched;
         }
         // Array as Rule list.
         else if (rule instanceof Array) {
             this.log('[RULE] List: ' + rule);
+            const backupState = _.cloneDeep(s.state);
+
             const resultList: any[] = [];
             for(const i in rule){
                 const r = rule[i];
-                if (!this.parse(r, state)) {
+                if (!this.parse(r, s)) {
+                    s.state = backupState;
                     return false;
                 }
-                resultList.push(state.match);
+                resultList.push(s.state.match);
             }
-            state.match = resultList;
+            s.state.match = resultList;
             return true;
         }
         // Object as tagged rule.
@@ -140,11 +145,15 @@ export class Parser {
             const taggedRule = (rule as any)[tag];
             this.log(`[RULE] Tagged: {${tag}: ${taggedRule}}`);
 
-            if (!this.parse(taggedRule, state)) {
+            const backupTagged = s.state.taggedMatch;
+            s.state.taggedMatch = {};
+            if (!this.parse(taggedRule, s)) {
+                s.state.taggedMatch = backupTagged;
                 return false;
             }
-
-            state.taggedMatch[tag] = state.match;
+            backupTagged[tag] = Object.assign( s.state.taggedMatch, s.state.match );
+            s.state.taggedMatch = backupTagged;
+            
             return true;
         }
         // Function as Logical rule.
@@ -157,13 +166,8 @@ export class Parser {
                     this.log('[RULE] or: ' + rules);
 
                     for(const i in rules){
-                        const backupState = _.cloneDeep(state);
-                        if( this.parse(rules[i], state) ){
+                        if( this.parse(rules[i], s) ){
                             return true;
-                        }else{
-                            // Fallback text and taggedMatch.
-                            state.text = backupState.text;
-                            state.taggedMatch = backupState.taggedMatch;
                         }
                     }
 
