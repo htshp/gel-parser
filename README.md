@@ -39,3 +39,4 @@ Roadmap
 - [ ] Support left recursive.
 - [ ] 'option' rule.
 - [ ] Better test.
+- [ ] Replace $ type from string to IMatchResult.
