@@ -3,11 +3,11 @@ import { LogicalRuleFunc, ILogicalRule } from './logicalRule';
 
 export type RuleAtom = string | RegExp | {[tag: string]: TopLevelRule;} | LogicalRuleFunc;
 
-export interface Rule {
+export interface IRule {
     [index: number]: RuleAtom;
 }
 
-export type TopLevelRule = Rule | RuleAtom;
+export type TopLevelRule = IRule | RuleAtom;
 
 export interface IRuleSet {
     $begin: TopLevelRule;
@@ -162,7 +162,7 @@ export class Parser {
 
             switch(logicalRule.type){
                 case 'or':
-                    const rules: TopLevelRule[] = logicalRule.value;
+                    const rules: TopLevelRule[] = logicalRule.rules;
                     this.log('[RULE] or: ' + rules);
 
                     for(const i in rules){
@@ -171,6 +171,47 @@ export class Parser {
                         }
                     }
 
+                    return false;
+                case 'time':
+                    const backupState = s.state;
+                    let range: {start: number, end: number};
+
+                    if(logicalRule.count == null){
+                        // 0 more than.
+                        range = {
+                            start: 0,
+                            end: Number.MAX_SAFE_INTEGER
+                        };
+                    }else if(logicalRule.count instanceof Number){
+                        // Just count.
+                        range = {
+                            start: logicalRule.count,
+                            end: logicalRule.count
+                        };
+                    }else{
+                        // Range base
+                        range = {
+                            start: logicalRule.count.start,
+                            end: logicalRule.count.end
+                        };
+                    }
+
+                    let i = 0;
+                    const matches = [];
+                    for(;i <= range.end;++i){
+                        if( !this.parse(logicalRule.rule, s)){
+                            break;
+                        }
+                        matches.push(Object.assign( s.state.match, s.state.taggedMatch ));
+                        s.state.taggedMatch = {};
+                    }
+
+                    if(i >= range.start){
+                        s.state.match = matches;
+                        return true; 
+                    }
+
+                    s.state = backupState;
                     return false;
             }
         }

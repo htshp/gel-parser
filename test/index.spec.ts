@@ -1,6 +1,6 @@
 import * as assert from 'power-assert';
 import { Parser } from '../src/index';
-import { or } from '../src/logicalRule';
+import { or, time } from '../src/logicalRule';
 
 describe('GEL Parser', () => {
     context('Calculator parser test.', () => {
@@ -154,6 +154,41 @@ describe('GEL Parser', () => {
 
         it('Match results can be obtained even with nested tags.', () => {
             assert.equal(result.a.b.c, '100');
+        });
+    });
+
+    context('Time rule.', () => {
+        const rules = {
+            $begin: or('just', 'greater', 'lesser', 'range', 'tagged'),
+            just: time(/a/, 5),
+            greater: time(/b/, {start: 2}),
+            lesser: time(/c/, {end: 8}),
+            range: time(/d/, {start: 3, end: 5}),
+            tagged: time({a: /e/}, 2)
+        };
+
+        const parser = new Parser(rules, {});
+        
+        it('just', () => {
+            assert.notEqual( parser.run('aaaaa'), null );
+            assert.equal( parser.run('aaaa'), null );
+            assert.equal( parser.run('aaaaaa'), null );
+        });
+
+        it('greater', () => {
+            
+        });
+
+        it('lesser', () => {
+            
+        });
+
+        it('range', () => {
+            
+        });
+
+        it('tagged', () => {
+            
         });
     });
 });

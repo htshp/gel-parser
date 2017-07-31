@@ -1,19 +1,31 @@
 import { TopLevelRule } from './parser';
 
-export interface ILogicalRule {
-    type: 'or';
-    value: any;
-}
+export type ILogicalRule = IOrRule | ITimeRule;
 
 export type LogicalRuleFunc = () => ILogicalRule;
 
-export function or(...rules: TopLevelRule[]): LogicalRuleFunc {
-    const ret: ILogicalRule = {
-        type: 'or',
-        value: rules
-    };
+export interface IOrRule {
+    type: 'or';
+    rules: TopLevelRule[];
+}
 
-    return () => {
-        return ret;
-    };
+export function or(...rules: TopLevelRule[]): LogicalRuleFunc {
+    return () => ({
+        type: 'or',
+        rules: rules
+    });
+}
+
+export interface ITimeRule {
+    type: 'time';
+    rule: TopLevelRule;
+    count: number | {start?: number, end?: number};
+}
+
+export function time(rule: TopLevelRule, count: number | {start?: number, end?: number}): LogicalRuleFunc {
+    return () => ({
+        type: 'time',
+        rule: rule,
+        count: count
+    });
 }

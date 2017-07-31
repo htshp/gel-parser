@@ -1,2 +1,2 @@
 export { Parser } from './parser';
-export { or } from './logicalRule';
+export { or, time } from './logicalRule';
