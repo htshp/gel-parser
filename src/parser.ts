@@ -112,7 +112,7 @@ export class Parser {
 
             if(isMatched){
                 if(Object.keys(s.state.taggedMatch).length > 0){
-                    s.state.match = Object.assign({}, s.state.match, s.state.taggedMatch);
+                    s.state.match = Object.assign(s.state.match, s.state.taggedMatch);
                 }
                 if (this.actSet[rule as string]) {
                     s.state.match = this.actSet[rule as string](s.state.match);
@@ -151,7 +151,7 @@ export class Parser {
                 s.state.taggedMatch = backupTagged;
                 return false;
             }
-            backupTagged[tag] = Object.assign( s.state.taggedMatch, s.state.match );
+            backupTagged[tag] = Object.assign( s.state.match, s.state.taggedMatch );
             s.state.taggedMatch = backupTagged;
             
             return true;

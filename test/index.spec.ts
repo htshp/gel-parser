@@ -26,7 +26,7 @@ describe('GEL Parser', () => {
         const result = parser.run('1 + 2 + 3 + 2000 + 100');
 
         it('The calculation result is correct.', () => {
-            assert.strictEqual(result, 2106);
+            assert.equal(result, 2106);
         });
     });
 
@@ -43,12 +43,12 @@ describe('GEL Parser', () => {
 
         it('Match only one rule.', () => {
             const result = parser.run('100');
-            assert.strictEqual(result.a, '100');
+            assert.equal(result.a, '100');
             assert.strictEqual(result.b, undefined);
 
             const result2 = parser.run('abc');
             assert.strictEqual(result2.a, undefined);
-            assert.strictEqual(result2.b, 'abc');
+            assert.equal(result2.b, 'abc');
         });
     });
 
@@ -135,7 +135,7 @@ describe('GEL Parser', () => {
         const actions = {
             $begin: $ => {
                 it('Match results can be obtained by tag specification.', () => {
-                    assert.strictEqual($.a, 'hello');
+                    assert.equal($.a, 'hello');
                     return $;
                 });
             }
@@ -153,8 +153,7 @@ describe('GEL Parser', () => {
         const result = parser.run('100',  {verbose: true});
 
         it('Match results can be obtained even with nested tags.', () => {
-            console.log(result);
-            assert.strictEqual(result.a.b.c, '100');
+            assert.equal(new String(result.a.b.c), '100');
         });
     });
 });
