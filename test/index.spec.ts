@@ -150,10 +150,10 @@ describe('GEL Parser', () => {
         };
 
         const parser = new Parser(rules, {});
-        const result = parser.run('100',  {verbose: true});
+        const result = parser.run('100');
 
         it('Match results can be obtained even with nested tags.', () => {
-            assert.equal(new String(result.a.b.c), '100');
+            assert.equal(result.a.b.c, '100');
         });
     });
 });

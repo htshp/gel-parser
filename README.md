@@ -9,14 +9,14 @@ Usage
 import {Parser} from 'gel-parser';
 
 const rules = {
-    $begin:  ['binExpr'],
+    $begin:  'binExpr',
     binExpr: [{left: 'atom'}, /[+]/, {right: 'atom'}],
-    atom:    [/[0-9]+/]
+    atom:    /[0-9]+/
 };
 
 const actions = {
     binExpr: $=>$.left + $.right,
-    atom:    $=>parseInt($[0])
+    atom:    $=>parseInt($)
 };
 
 const intParser = new Parser(rules, actions);
@@ -32,11 +32,10 @@ Roadmap
 - [x] 'or' rule.
 - [x] Calculator sample.
 - [ ] DSL sample.
-- [ ] Nest tag rule. 
+- [x] Nest tag rule. 
 - [ ] Backtracking.
 - [ ] Error check.
 - [ ] 'time' rule.
 - [ ] Support left recursive.
 - [ ] 'option' rule.
 - [ ] Better test.
-- [ ] Replace $ type from string to IMatchResult.
