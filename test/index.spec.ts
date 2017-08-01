@@ -170,9 +170,12 @@ describe('GEL Parser', () => {
         const parser = new Parser(rules, {});
         
         it('just', () => {
+            const parser = new Parser({
+                $begin: time(/a/, 5)
+            }, {});
             assert.notEqual( parser.run('aaaaa'), null );
             assert.equal( parser.run('aaaa'), null );
-            assert.equal( parser.run('aaaaaa'), null );
+            assert.equal( parser.run('aaaaaa'),'aaaaa' );
         });
 
         it('greater', () => {

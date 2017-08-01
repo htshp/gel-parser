@@ -173,7 +173,7 @@ export class Parser {
 
                     return false;
                 case 'time':
-                    const backupState = s.state;
+                    const backupState = _.cloneDeep(s.state);
                     let range: {start: number, end: number};
 
                     if(logicalRule.count == null){
@@ -182,19 +182,22 @@ export class Parser {
                             start: 0,
                             end: Number.MAX_SAFE_INTEGER
                         };
-                    }else if(logicalRule.count instanceof Number){
+                    }else if(isFinite(logicalRule.count as number)){
                         // Just count.
+                        const count = logicalRule.count as number;
                         range = {
-                            start: logicalRule.count,
-                            end: logicalRule.count
+                            start: count,
+                            end: count
                         };
                     }else{
                         // Range base
+                        const {start, end} = logicalRule.count as {start: number, end: number};
                         range = {
-                            start: logicalRule.count.start,
-                            end: logicalRule.count.end
+                            start: start || 0,
+                            end: end || Number.MAX_SAFE_INTEGER
                         };
                     }
+                    this.log(`[RULE] time: ${range.start}-${range.end}`);
 
                     let i = 0;
                     const matches = [];
