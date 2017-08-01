@@ -19,13 +19,22 @@ export function or(...rules: TopLevelRule[]): LogicalRuleFunc {
 export interface ITimeRule {
     type: 'time';
     rule: TopLevelRule;
-    count: number | {start?: number, end?: number};
+    from: number;
+    to: number;
 }
 
-export function time(rule: TopLevelRule, count: number | {start?: number, end?: number}): LogicalRuleFunc {
+/**
+ * time(r)        : 0 or more.
+ * time(r, 3)     : 3 or more.
+ * time(r, -5)    : 5 or less.
+ * time(r, 2, -4) : 2 or more and 4 or less.
+ * time(r, 4, -4) : Just 4 times.
+ */
+export function time(rule: TopLevelRule, from?: number, to?: number): LogicalRuleFunc {
     return () => ({
         type: 'time',
         rule: rule,
-        count: count
+        from: from,
+        to: to
     });
 }

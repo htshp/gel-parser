@@ -174,34 +174,25 @@ export class Parser {
                     return false;
                 case 'time':
                     const backupState = _.cloneDeep(s.state);
-                    let range: {start: number, end: number};
-
-                    if(logicalRule.count == null){
-                        // 0 more than.
-                        range = {
-                            start: 0,
-                            end: Number.MAX_SAFE_INTEGER
-                        };
-                    }else if(isFinite(logicalRule.count as number)){
-                        // Just count.
-                        const count = logicalRule.count as number;
-                        range = {
-                            start: count,
-                            end: count
-                        };
-                    }else{
-                        // Range base
-                        const {start, end} = logicalRule.count as {start: number, end: number};
-                        range = {
-                            start: start || 0,
-                            end: end || Number.MAX_SAFE_INTEGER
-                        };
+                    
+                    let min = 0;
+                    let max = Number.MAX_SAFE_INTEGER;
+                    if(logicalRule.from != null && logicalRule.to != null){
+                        min = logicalRule.from;
+                        max = Math.abs(logicalRule.to);
+                    }else if(logicalRule.from != null && logicalRule.to == null){
+                        if(logicalRule.from < 0){
+                            max = Math.abs(logicalRule.from);
+                        }else{
+                            min = logicalRule.from;
+                        }
                     }
-                    this.log(`[RULE] time: ${range.start}-${range.end}`);
+
+                    this.log(`[RULE] time: ${min}-${max}`);
 
                     let i = 0;
                     const matches = [];
-                    for(;i <= range.end;++i){
+                    for(;i < max;++i){
                         if( !this.parse(logicalRule.rule, s)){
                             break;
                         }
@@ -209,7 +200,7 @@ export class Parser {
                         s.state.taggedMatch = {};
                     }
 
-                    if(i >= range.start){
+                    if(i >= min){
                         s.state.match = matches;
                         return true; 
                     }

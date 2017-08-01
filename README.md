@@ -35,7 +35,7 @@ Roadmap
 - [x] Nest tag rule. 
 - [ ] Backtracking.
 - [ ] Error check.
-- [ ] 'time' rule.
+- [x] 'time' rule.
 - [ ] Support left recursive.
 - [ ] 'option' rule.
 - [ ] Better test.

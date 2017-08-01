@@ -158,40 +158,35 @@ describe('GEL Parser', () => {
     });
 
     context('Time rule.', () => {
-        const rules = {
-            $begin: or('just', 'greater', 'lesser', 'range', 'tagged'),
-            just: time(/a/, 5),
-            greater: time(/b/, {start: 2}),
-            lesser: time(/c/, {end: 8}),
-            range: time(/d/, {start: 3, end: 5}),
-            tagged: time({a: /e/}, 2)
-        };
-
-        const parser = new Parser(rules, {});
-        
-        it('just', () => {
-            const parser = new Parser({
-                $begin: time(/a/, 5)
-            }, {});
-            assert.notEqual( parser.run('aaaaa'), null );
-            assert.equal( parser.run('aaaa'), null );
-            assert.equal( parser.run('aaaaaa'),'aaaaa' );
+        it('When number of times is omitted, match zero or more times.', () => {
+            const result = new Parser({$begin: time(/a/) }, {}).run('aaa');
+            assert.deepEqual(result, [new String('a'), new String('a'), new String('a')]);
         });
 
-        it('greater', () => {
-            
+        it('When one positive number is specified Match three or more times.', () => {
+            const result = new Parser({$begin: time(/a/, 2) }, {}).run('aaa');
+            assert.deepEqual(result, [new String('a'), new String('a'), new String('a')]);
         });
 
-        it('lesser', () => {
-            
+        it('If one negative number is specified Match three times or less.', () => {
+            const result = new Parser({$begin: time(/a/, -4) }, {}).run('aaa');
+            assert.deepEqual(result, [new String('a'), new String('a'), new String('a')]);
         });
 
-        it('range', () => {
-            
+        it('If positive and negative numbers are specified, they are matched in the specified range.', () => {
+            const result = new Parser({$begin: time(/a/, 2 , -4) }, {}).run('aaa');
+            assert.deepEqual(result, [new String('a'), new String('a'), new String('a')]);
         });
 
-        it('tagged', () => {
-            
+        it('Match can continue normally after match.', () => {
+            const text = 'a!b!c!123';
+            const rule = {
+                $begin: [time('id'), 'int'],
+                id: /[a-z]\!/,
+                int: /[0-9]+/
+            };
+            const result = new Parser(rule, {}).run(text);
+            assert.equal(result[1], '123');
         });
     });
 });
