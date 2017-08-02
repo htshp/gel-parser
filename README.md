@@ -39,3 +39,10 @@ Roadmap
 - [ ] Support left recursive.
 - [ ] 'option' rule.
 - [ ] Better test.
+
+Known issues
+----
+
+- The Match result of native type be wrap boxxing.
+  - 'a' -> new String('a')
+- Not assume that null or undefined will be returned in the match result.
